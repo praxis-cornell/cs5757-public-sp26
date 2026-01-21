@@ -1,0 +1,6 @@
+matplotlib
+pytest
+pytest-json-report
+jax==0.6.2
+jaxlib==0.6.2
+jupyter
