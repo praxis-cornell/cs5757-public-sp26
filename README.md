@@ -1,13 +1,16 @@
 # CS5757: Optimization Methods for Robotics
 
-Spring 2026 Homework assignments for [CS5757 - Optimization Methods for Robotics](https://www.cs.cornell.edu/courses/cs5757/2026sp/#).
+Spring 2026 Repo for [CS5757 - Optimization Methods for Robotics](https://www.cs.cornell.edu/courses/cs5757/2026sp/#).
 
-## Repository Structure
+## Repository Structure 
 
-Each homework assignment is in its own directory:
+The `assignments/` folder contains homework assignments: Each homework assignment is in its own directory:
 - `hw0/` - Homework 0
 - `hw1/` - Homework 1
 - etc.
+
+The `lectures/` folder contains lecture materials:
+- Codes and written nodes
 
 ## Getting Started
 
