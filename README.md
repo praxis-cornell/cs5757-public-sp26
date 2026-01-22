@@ -28,7 +28,7 @@ Please submit on Gradescope, more details can be found on the website
 For questions about assignments, please use the course Ed discussion forum or attend office hours.
 
 
-#Lecture Materials
+# Lecture Materials
 
 The `lectures/` folder contains lecture materials: Each lectures have its own directory: This directory contains example code and demos used in lecture for CS 5757: Optimization Methods for Robotics, as well as lecture notes.
 
