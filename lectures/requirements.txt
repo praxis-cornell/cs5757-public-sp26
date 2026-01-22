@@ -1,0 +1,5 @@
+ipykernel
+matplotlib
+mujoco
+jax
+judo-rai
