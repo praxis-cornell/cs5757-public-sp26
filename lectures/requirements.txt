@@ -3,5 +3,6 @@ matplotlib
 mujoco
 mujoco-mjx
 jax
+jaxlie
 judo-rai
 plotly
