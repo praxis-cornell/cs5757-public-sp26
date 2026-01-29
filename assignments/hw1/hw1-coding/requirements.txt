@@ -1,0 +1,9 @@
+gradescope-utils
+jax==0.6.2
+jaxlib==0.6.2
+jaxlie
+jupyter
+pytest
+pytest-json-report
+trimesh
+viser<1.0.21
