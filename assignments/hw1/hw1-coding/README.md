@@ -1,6 +1,6 @@
-## HW0 (Programming): Least Squares via JAX
+## HW1 (Programming): Robotics Fundamentals
 
-Instructions for this assignment are given in the HW0 PDF.
+Instructions for this assignment are given in the HW1 PDF.
 
 Programming assignments in CS 5757 have two components:
 
@@ -77,13 +77,13 @@ If you already have conda installed, you can use it instead of `uv`.
 
 ### 1. Create a conda environment
 
-    conda create -n hw0 python=3.12
+    conda create -n hw1 python=3.12
 
 ---
 
 ### 2. Activate the environment
 
-    conda activate hw0
+    conda activate hw1
 
 ---
 
@@ -97,8 +97,8 @@ If you already have conda installed, you can use it instead of `uv`.
 
     pip install ipykernel
     python -m ipykernel install --user \
-      --name hw0 \
-      --display-name "Python (HW0)"
+      --name hw1 \
+      --display-name "Python (HW1)"
 
 ---
 
@@ -106,7 +106,7 @@ If you already have conda installed, you can use it instead of `uv`.
 
 When opening the notebook in Jupyter or VS Code, select:
 
-    Kernel → Change Kernel → Python (HW0)
+    Kernel → Change Kernel → Python (HW1)
 
 You can verify that the correct environment is active by running:
 
@@ -118,4 +118,4 @@ You can verify that the correct environment is active by running:
 To remove the environment if needed:
 
     conda deactivate
-    conda env remove -n hw0
+    conda env remove -n hw1
