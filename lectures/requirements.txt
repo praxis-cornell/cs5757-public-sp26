@@ -6,3 +6,4 @@ jax
 jaxlie
 judo-rai
 plotly
+git+https://github.com/chungmin99/pyroki.git#egg=pyroki
