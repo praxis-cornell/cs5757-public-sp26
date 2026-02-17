@@ -512,7 +512,7 @@ class TestRetargeting(unittest.TestCase):
         # You can specify an npz file like: "walking1.npz" or None for synthetic data
         import time
         import sys
-        npz_files = ["data/walking1.npz", "data/cartwheel.npz", "data/alaska.npz"]  # Change this to use different motion files
+        npz_files = ["data/walking1.npz", "data/handspring.npz", "data/alaska.npz"]  # Change this to use different motion files
         final_cost = 0.0
         for npz_file in npz_files:
             problem = self.create_retargeting_problem(npz_file=npz_file, T=20, n_retarget=13, seed=42)
@@ -526,9 +526,6 @@ class TestRetargeting(unittest.TestCase):
         print(f"Final cost: {final_cost}", file=sys.stderr)
         assert final_cost > 0.0, "Final cost is too low"
 
-
-
-        
 
 if __name__ == "__main__":
     unittest.main()
