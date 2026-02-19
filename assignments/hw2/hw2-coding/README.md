@@ -7,7 +7,7 @@ Programming assignments in CS 5757 have two components:
 - Interactive scripts / Jupyter notebooks for visualization and experimentation
 - A Python module, `solution.py`, where you will implement the required functions
 
-You should edit **only** `solution.py`. The script `run_retargeting.py` is provided to help you run and visualize your code.
+**Submission Instructions:** Submit your writeup as a PDF to the Written Assignment on Gradescope. For the Programming Assignment, submit *only* your completed `solutions.py` - the script `run_retargeting` is just to visualize and debug your solutions.
 
 We recommend using **VS Code (or any other python IDE you like)** for coding the assignment.
 ---
