@@ -7,7 +7,7 @@ Programming assignments in CS 5757 have two components:
 - A Jupyter notebook for visualization and experimentation
 - A Python module, `solution.py`, where you will implement the required functions
 
-You should edit **only** `solution.py`. The notebook is provided to help you run and visualize your code.
+**Submission Instructions:** Submit your writeup as a PDF to the Written Assignment on Gradescope. For the Programming Assignment, submit *only* your completed `solutions.py` - the Jupyter notebook is just to visualize your solutions.
 
 We recommend using **VS Code (or any other python IDE you like)** for coding the assignment and only use Jupyter Notebook to test it.
 ---
