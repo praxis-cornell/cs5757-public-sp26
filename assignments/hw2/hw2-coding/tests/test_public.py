@@ -216,12 +216,22 @@ class TestRetargeting(unittest.TestCase):
             return custom_optimizer_step(cost_fn, residual_fn, x, state)
         
         # Run optimizer
+        import time
+        start_time = time.time()
         x_opt = run_optimizer(step_fn, x0, state0, n_iters)
+        # end_time = time.time()
+        # print(f"Time taken: {end_time - start_time} seconds", file=sys.stderr)
         x_opt.block_until_ready()
+        end_time = time.time()
+        lowered = jax.jit(step_fn).lower(x0, state0)
+        cost = lowered.cost_analysis()
+        # print(cost, file=sys.stderr)
+        flops = cost['flops']/1e6 # convert to Mflops
         
+        # print(f"Time taken: {end_time - start_time} seconds", file=sys.stderr)
         # Compute and return final cost
         final_cost = float(cost_fn(x_opt))
-        return final_cost
+        return final_cost, end_time - start_time, flops*onp.log(n_iters)/10
 
     def create_retargeting_problem(
         self,
@@ -506,26 +516,26 @@ class TestRetargeting(unittest.TestCase):
             costs, gn_costs, atol=1e-5
         ), "Custom optimizer and Gauss-Newton produced the same cost after 5 iterations"
 
+
     def test_custom_optimizer_cost(self, set_leaderboard_value=None) -> None:
         """Leaderboard: Cost of the custom optimizer."""
-        # Create a retargeting problem from npz file or synthetic data
-        # You can specify an npz file like: "walking1.npz" or None for synthetic data
-        import time
+        # For the record: warning messages and stderr output can be seen on Gradescope.
+        # import time
         import sys
-        npz_files = ["data/walking1.npz", "data/handspring.npz", "data/alaska.npz"]  # Change this to use different motion files
+        npz_files = ["data/walking1.npz", "data/dribble.npz", "data/handspring.npz"]
         final_cost = 0.0
         for npz_file in npz_files:
             problem = self.create_retargeting_problem(npz_file=npz_file, T=20, n_retarget=13, seed=42)
-            start_time = time.time()
-            cost = self.run_retargeting_trajectory(problem, n_iters=N_ITERS)
-            end_time = time.time()
-            print(f"Time taken: {end_time - start_time} seconds", file=sys.stderr)
-            print(f"Cost: {cost}", file=sys.stderr)   
-            final_cost += cost + (end_time - start_time)*5
-        # set_leaderboard_value(final_cost)
+            cost, total_time, flops = self.run_retargeting_trajectory(problem, n_iters=N_ITERS)
+            print(f"Time taken: {total_time} seconds", file=sys.stderr)
+            print(f"Cost: {cost}", file=sys.stderr)
+            print(f"Flops: {flops}", file=sys.stderr) 
+            final_cost += cost + flops
         print(f"Final cost: {final_cost}", file=sys.stderr)
         assert final_cost > 0.0, "Final cost is too low"
 
+
+        
 
 if __name__ == "__main__":
     unittest.main()
