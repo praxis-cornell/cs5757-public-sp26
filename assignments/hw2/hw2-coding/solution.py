@@ -134,7 +134,13 @@ def residuals_matching(
     problem: RetargetingProblem,
 ) -> jnp.ndarray:
     """Keypoint matching residuals."""
-    raise NotImplementedError()
+    # Vectorize robot_keypoints_single over T frames -> [T, n_retarget, 3]
+    robot_kps = jax.vmap(
+        robot_keypoints_single, in_axes=(0, 0, None, None)
+    )(joint_angles, pose_vecs, problem.robot, problem.g1_indices)
+
+    # Residual: predicted - target, flattened to 1D
+    return (robot_kps - problem.target_kps).ravel()
 
 
 # ============================================================
@@ -148,7 +154,15 @@ def residuals_smoothness(
     problem: RetargetingProblem,
 ) -> jnp.ndarray:
     """Temporal smoothness residuals."""
-    raise NotImplementedError()
+    # Joint angle velocity: q_{t+1} - q_t, shape [T-1, n_dof]
+    delta_ja = joint_angles[1:] - joint_angles[:-1]
+
+    # SE(3) relative twist: log((T_{t+1})^{-1} @ T_t), shape [T-1, 6]
+    T_curr = jax.vmap(jaxlie.SE3.exp)(pose_vecs[:-1])
+    T_next = jax.vmap(jaxlie.SE3.exp)(pose_vecs[1:])
+    delta_pv = jax.vmap(lambda a, b: (b.inverse() @ a).log())(T_curr, T_next)
+
+    return jnp.concatenate([delta_ja, delta_pv], axis=-1).ravel()  # [(T-1)*(n_dof+6)]
 
 
 # ============================================================
@@ -162,7 +176,9 @@ def residuals_rest(
     problem: RetargetingProblem,
 ) -> jnp.ndarray:
     """Rest-pose regularisation residuals."""
-    raise NotImplementedError()
+    # Penalize deviation from rest joint angles across all frames
+    # joint_angles: [T, n_dof], rest_joint_angles: [n_dof]
+    return (joint_angles - problem.rest_joint_angles).ravel()  # [T * n_dof]
 
 
 # ============================================================
@@ -176,7 +192,12 @@ def residuals_limits(
     problem: RetargetingProblem,
 ) -> jnp.ndarray:
     """Soft joint-limit residuals (one-sided)."""
-    raise NotImplementedError()
+    # Hinge penalties: positive only when limits are violated
+    # joint_angles: [T, n_dof], lower/upper_limits: [n_dof]
+    lower_violation = jnp.maximum(0.0, problem.lower_limits - joint_angles)  # [T, n_dof]
+    upper_violation = jnp.maximum(0.0, joint_angles - problem.upper_limits)  # [T, n_dof]
+
+    return jnp.concatenate([lower_violation.ravel(), upper_violation.ravel()])  # [2 * T * n_dof]
 
 
 # ============================================================
@@ -191,7 +212,8 @@ def gradient_descent_step(
     lr: float,
 ) -> tuple[jnp.ndarray, dict]:
     """Applies one step of gradient descent."""
-    raise NotImplementedError()
+    grad = jax.grad(cost_fn)(x)
+    return x - lr * grad, state
 
 
 # ============================================================
@@ -206,7 +228,12 @@ def gauss_newton_step(
     damping: float = 1e-6,
 ) -> tuple[jnp.ndarray, dict]:
     """One step of damped Gauss-Newton (Levenberg-Marquardt)."""
-    raise NotImplementedError()
+    r = residual_fn(x)                      # [m]
+    J = jax.jacfwd(residual_fn)(x)          # [m, n]
+    JtJ = J.T @ J                           # [n, n]
+    Jtr = J.T @ r                           # [n]
+    delta = jnp.linalg.solve(JtJ + damping * jnp.eye(JtJ.shape[0]), -Jtr)
+    return x + delta, state
 
 
 # ============================================================
@@ -221,7 +248,11 @@ def gradient_descent_line_search_step(
     candidate_alphas: jnp.ndarray,
 ) -> tuple[jnp.ndarray, dict]:
     """One step of gradient descent with parallel line search."""
-    raise NotImplementedError()
+    g = jax.grad(cost_fn)(x)
+    # Evaluate cost for each candidate step size in parallel
+    costs = jax.vmap(lambda alpha: cost_fn(x - alpha * g))(candidate_alphas)
+    best_alpha = candidate_alphas[jnp.argmin(costs)]
+    return x - best_alpha * g, state
 
 
 # ============================================================
@@ -238,12 +269,29 @@ def gauss_newton_matrix_free_step(
     cg_maxiter: int = 10,
 ) -> tuple[jnp.ndarray, dict]:
     """One step of Gauss-Newton, using the implicit form, and solving the normal equations with CG."""
-    raise NotImplementedError()
+    r = residual_fn(x)
+    _, vjp_fn = jax.vjp(residual_fn, x)
+    Jtr = vjp_fn(r)[0]  # J^T r
+
+    def matvec(v):
+        # (J^T J + λI) v = J^T (J v) + λv
+        _, Jv = jax.jvp(residual_fn, (x,), (v,))
+        JtJv = vjp_fn(Jv)[0]
+        return JtJv + damping * v
+
+    delta, _ = jax.scipy.sparse.linalg.cg(matvec, -Jtr, tol=cg_tol, maxiter=cg_maxiter)
+    return x + delta, state
 
 
 # ============================================================
 # Question 2.4 — Custom optimizer (for leaderboard)
 # ============================================================
+
+
+_ADAM_LR = 5e-2
+_ADAM_BETA1 = 0.9
+_ADAM_BETA2 = 0.999
+_ADAM_EPS = 1e-8
 
 
 def custom_optimizer_init(
@@ -252,9 +300,12 @@ def custom_optimizer_init(
     x0: jnp.ndarray,
     problem: Optional[RetargetingProblem] = None,
 ) -> tuple[jnp.ndarray, dict]:
-    """Creates an initial state for your custom optimizer."""
-    return x0, {}
-
+    """Creates an initial state for your custom optimizer (Adam)."""
+    return x0, {
+        "m": jnp.zeros_like(x0),   # first moment
+        "v": jnp.zeros_like(x0),   # second moment
+        "t": jnp.array(0),         # step count
+    }
 
 
 def custom_optimizer_step(
@@ -263,10 +314,20 @@ def custom_optimizer_step(
     x: jnp.ndarray,
     state: dict,
 ) -> tuple[jnp.ndarray, dict]:
-    """Applies one step of your custom optimizer."""
-    return gauss_newton_matrix_free_step(
-        residual_fn, x, state, damping=1e-6, cg_tol=1e-5, cg_maxiter=10
-    )
+    """Applies one step of Adam."""
+    m, v, t = state["m"], state["v"], state["t"]
+    t = t + 1
 
-N_ITERS = 100
+    g = jax.grad(cost_fn)(x)
+    m = _ADAM_BETA1 * m + (1 - _ADAM_BETA1) * g
+    v = _ADAM_BETA2 * v + (1 - _ADAM_BETA2) * g ** 2
+
+    # Bias correction
+    m_hat = m / (1 - _ADAM_BETA1 ** t)
+    v_hat = v / (1 - _ADAM_BETA2 ** t)
+
+    x = x - _ADAM_LR * m_hat / (jnp.sqrt(v_hat) + _ADAM_EPS)
+    return x, {"m": m, "v": v, "t": t}
+
+N_ITERS = 200
 # Modify the iterations for custom optimizer
