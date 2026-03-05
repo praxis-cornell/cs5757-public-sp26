@@ -1,3 +1,4 @@
+cvxpy
 ipykernel
 matplotlib
 mujoco
