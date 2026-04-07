@@ -1,5 +1,6 @@
 setuptools
 matplotlib
+cxvpy
 mujoco
 pytest
 pytest-json-report
