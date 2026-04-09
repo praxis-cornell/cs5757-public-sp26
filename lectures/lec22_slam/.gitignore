@@ -1,0 +1,16 @@
+# COLMAP intermediate / build artifacts — keep only sparse/0/{cameras,images,points3D}.bin
+office/colmap/database.db
+office/colmap/*.h5
+office/colmap/pairs-*.txt
+office/colmap/sparse/*/database.db
+office/colmap/sparse/*/colmap.LOG.*
+office/colmap/sparse/*/models/
+
+# Image pyramid levels we don't ship — only images_4/ is used
+office/images/
+office/images_2/
+office/images_8/
+
+# Misc COLMAP/NeRF exports we don't use here
+office/sparse_pc.ply
+office/transforms.json
