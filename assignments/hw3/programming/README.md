@@ -1,18 +1,16 @@
-## HW4 (Programming): SLAM and Sampling-Based MPC
+## HW3 (Programming): Optimal Control
 
-Instructions for this assignment are given in the HW4 PDF.
+Instructions for this assignment are given in the HW3 PDF.
 
 Programming assignments in CS 5757 have two components:
 
-- Interactive scripts for visualization and experimentation
+- Interactive scripts / Jupyter notebooks for visualization and experimentation
 - A Python module, `solution.py`, where you will implement the required functions
 
-You should edit **only** `solution.py`. The scripts `run_slam.py` and `sampling_mpc.py` are provided to help you run and visualize your code.
+You should edit **only** `solution.py`. The script `run_retargeting.py` is provided to help you run and visualize your code.
 
-We recommend using **VS Code (or any other Python IDE you like)** for coding the assignment.
-
+We recommend using **VS Code (or any other python IDE you like)** for coding the assignment.
 ---
-
 ## Configuring Python
 
 We recommend working locally and using `uv` to manage a per-assignment virtual environment. This avoids dependency conflicts between assignments and makes kernel selection explicit.
@@ -39,17 +37,11 @@ This installs all required packages into the assignment-specific environment.
 ---
 
 ### 3. Running the assignment scripts
+This assignment have three scripts, `problem[1/2/3].py`, which you can run with:
+    
+    uv run python problem[1/2/3].py
 
-**Gauss–Newton SLAM** (`run_slam.py` — warehouse trajectory estimation):
-
-    uv run python run_slam.py
-
-**Sampling-based MPC** (`sampling_mpc.py` — MuJoCo HalfCheetah; example invocations):
-
-    uv run python sampling_mpc.py --method mppi --K 256 --H 64 --n 8 --seed 0
-    uv run python sampling_mpc.py --method mppi --K 256 --H 64 --n 8 --seed 0 --visualize
-
-See the docstring at the top of `sampling_mpc.py` for additional options (e.g. sweeps).
+This will run the each question.
 
 ---
 
@@ -63,13 +55,13 @@ If you already have conda installed, you can use it instead of `uv`.
 
 ### 1. Create a conda environment
 
-    conda create -n hw4 python=3.12
+    conda create -n hw2 python=3.12
 
 ---
 
 ### 2. Activate the environment
 
-    conda activate hw4
+    conda activate hw2
 
 ---
 
@@ -80,13 +72,14 @@ If you already have conda installed, you can use it instead of `uv`.
 ---
 
 ### 4. Running the assignment scripts
+This assignment has a single script, `run_retargeting.py`, which you can run with:
+    
+    python run_retargeting.py
 
-    python run_slam.py
-    python sampling_mpc.py --method mppi --K 256 --H 64 --n 8 --seed 0
 
 ---
 
 To remove the environment if needed:
 
     conda deactivate
-    conda env remove -n hw4
+    conda env remove -n hw2
